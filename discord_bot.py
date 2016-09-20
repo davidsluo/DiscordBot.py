@@ -3,7 +3,7 @@ import logging
 
 from discord.ext import commands
 
-logging.basicConfig(format="[%(asctime)s] [%(levelname)-8s] - %(message)s", level=logging.DEBUG)
+logging.basicConfig(format="[%(asctime)s] [%(levelname)-8s] - %(message)s", level=logging.INFO)
 
 bot = commands.Bot(
     command_prefix="?",

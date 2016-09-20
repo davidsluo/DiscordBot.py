@@ -20,6 +20,16 @@ class_info_pattern = "{}wow/data/talents?locale=en_US&apikey={}"
 
 response_pattern = "{}-{} is an iLevel {} {} {} in the guild {}.\n{}"
 
+# TODO: load this list from api
+raids = [
+    "Molten Core", "Blackwing Lair", "Ruins of Ahn'Qiraj", "Ahn'Qiraj Temple", "Karazhan", "Magtheridon's Lair",
+    "Gruul's Lair", "Serpentshrine Cavern", "Tempest Keep", "The Battle for Mount Hyjal", "Black Temple", "The Sunwell",
+    "Vault of Archavon", "Naxxramas", "The Obsidian Sanctum", "The Eye of Eternity", "Ulduar", "Onyxia's Lair",
+    "Trial of the Crusader", "Icecrown Citadel", "The Ruby Sanctum", "Baradin Hold", "Blackwing Descent",
+    "The Bastion of Twilight", "Throne of the Four Winds", "Firelands", "Dragon Soul", "Mogu'shan Vaults",
+    "Heart of Fear", "Terrace of Endless Spring", "Throne of Thunder", "Siege of Orgrimmar", "Highmaul",
+    "Blackrock Foundry", "Hellfire Citadel", "The Emerald Nightmare", "The Nighthold"
+]
 
 # TODO: simulate dps? make sure response from blizzard api is code 200
 class WoWSearch:
@@ -28,59 +38,49 @@ class WoWSearch:
         self.bot = bot
         self.battle_net_api_key = bot.config['battle_net_api_key']
 
-        self.__load_races()
+        # self.__load_races()
         self.__load_classes()
+
+    # is this method really necessary?
+    @staticmethod
+    def __api_request(url):
+
+        # TODO: make this method accept fields as arguments and create the URL itself.
+        r = requests.get(url)
+
+        return r.status_code, r.json()
 
     def __load_races(self):
         request_url = race_info_pattern.format(battle_net_api["US"], self.battle_net_api_key)
 
-        r = requests.get(request_url)
+        status, response = self.__api_request(request_url)
 
-        response = r.json()
+        if status == 200:
+            self.races = {}
 
-        self.races = {}
+            for i in response['races']:
+                self.races[i['id']] = i['name']
 
-        for i in response['races']:
-            self.races[i['id']] = i['name']
+        else:
+            raise Exception("Failed to load races from Blizzard API. Status code: " + status)
 
     def __load_classes(self):
         request_url = class_info_pattern.format(battle_net_api["US"], self.battle_net_api_key)
 
-        r = requests.get(request_url)
+        status, response = self.__api_request(request_url)
 
-        response = r.json()
+        if status == 200:
 
-        self.classes = {}
+            self.classes = {}
 
-        for i in response:
-            self.classes[int(i)] = {
-                "class": response[i]["class"].title(),
-                "specs": [j["name"] for j in response[i]["specs"]]
-            }
+            for i in response:
+                self.classes[int(i)] = {
+                    "class": response[i]["class"].title(),
+                    "specs": [j["name"] for j in response[i]["specs"]]
+                }
 
-    def __get_character_info(self, character: str, realm: str):
-        request_url = character_info_pattern.format(battle_net_api["US"], realm, character, self.battle_net_api_key)
-
-        r = requests.get(request_url)
-
-        response = r.json()
-
-        if r.status_code != 200:
-            logging.error(
-                "Invalid status code while getting character info: " + str(r.status_code) + "\n" + request_url)
-            return r.status_code, response['reason']
         else:
-            character_info = {
-                'name': response['name'],
-                'realm': response['realm'],
-                'class': self.classes[response['class']]['class'],
-                'spec': response['talents'][0]['spec']['name'],
-                'ilvl': response['items']['averageItemLevelEquipped'],
-                'guild': response['guild']['name'],
-                'progression': response['progression']['raids']
-            }
-
-            return r.status_code, character_info
+            raise Exception("Failed to load classes from Blizzard API. Status code: " + status)
 
     def __get_guild_info(self, guild: str, realm: str):
         pass
@@ -93,6 +93,7 @@ class WoWSearch:
         aliases=["playerlookup"],
         pass_context=True
     )
+    # figure out how to make this call the info command if no subcommand is given.
     async def player_lookup(self, ctx):
         if ctx.invoked_subcommand is None:
             await self.bot.say("Invalid subcommand: " + ctx.subcommand_passed)
@@ -117,27 +118,62 @@ class WoWSearch:
                 name = character[0]
                 realm = character[1]
 
-                status_code, info = self.__get_character_info(name, realm)
+                request_url = character_info_pattern.format(battle_net_api["US"], realm, name, self.battle_net_api_key)
 
-                if status_code == 200:
+                r = requests.get(request_url)
+
+                status, response = self.__api_request(request_url)
+
+                if r.status_code != 200:
+                    logging.error(
+                        "Invalid status code while getting character info: " + str(r.status_code) + "\n" + request_url)
+
+                    await self.bot.say("Error code: " + str(status) + ". Reason: " + response['reason'])
+                else:
+                    character_info = {
+                        'name': response['name'],
+                        'realm': response['realm'],
+                        'class': self.classes[response['class']]['class'],
+                        'spec': response['talents'][0]['spec']['name'],
+                        'ilvl': response['items']['averageItemLevelEquipped'],
+                        'guild': response['guild']['name'],
+                        'progression': response['progression']['raids']
+                    }
+
                     message = response_pattern.format(
-                        info['name'],
-                        info['realm'],
-                        info['ilvl'],
-                        info['spec'],
-                        info['class'],
-                        info['guild'],
-                        wow_page_template.format(info['realm'].replace("'", "").lower(), info['name'])
+                        character_info['name'],
+                        character_info['realm'],
+                        character_info['ilvl'],
+                        character_info['spec'],
+                        character_info['class'],
+                        character_info['guild'],
+                        wow_page_template.format(
+                            character_info['realm'].replace("'", "").lower(),
+                            character_info['name']
+                        )
                     )
 
                     await self.bot.say(message)
 
-                else:
-                    await self.bot.say("Error code: " + str(status_code) + ". Reason: " + info)
-
     @player_lookup.command(name="progress")
-    async def progression(self, player: str):
-        await self.bot.say(player)
+    async def progression(self, player: str, raid: str = "latest"):
+        logging.info("Getting " + raid + " progression for " + player + "...")
+
+        def search_for_raid(r: str):
+            for rd in raids:
+                if r.lower() in rd.lower():
+                    return rd
+
+            return None
+
+        raid_title = search_for_raid(raid)
+        if raid == "latest" or raid_title is not None:
+            pass
+            await self.bot.say("valid raid: " + raid_title)
+            # TODO: the rest of this method
+        else:
+            logging.error("Invalid raid tier: " + raid)
+            await self.bot.say("Raid not found: " + raid)
 
 
 def setup(bot):
