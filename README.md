@@ -9,8 +9,9 @@ I may or may not know what I'm doing, so things will probably be broken often.
 * YouTube search
 * Soundboard
 * WoW stuff
-    * Guild Lookup
+    * Guild lookup
     * More detailed player lookup
+* Some administrative/debug comands
 
 ## WIP
 * WoW stuff
