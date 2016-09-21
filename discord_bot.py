@@ -18,7 +18,10 @@ def load_config():
 if __name__ == '__main__':
     config = load_config()
 
-    extensions = ['cogs.wow']
+    extensions = [
+        # 'cogs.wow',
+        'cogs.warcraftlogs'
+    ]
 
     bot.config = config
 

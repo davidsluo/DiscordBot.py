@@ -14,6 +14,10 @@ I may or may not know what I'm doing, so things will probably be broken often.
 * Some administrative/debug comands
 
 ## WIP
+* WoW Stuff
+    * Warcraft logs integration
+
+## On Hold
 * WoW stuff
     * Getting player progression
 

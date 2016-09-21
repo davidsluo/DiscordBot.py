@@ -38,6 +38,29 @@ class WarcraftLogs:
         else:
             await self.bot.say("Error while retrieving logs.")
 
+    @commands.command(
+        name="hlogs",
+        aliases=["hlog"],
+        description="Get healing logs.",
+        brief="Get healing logs."
+    )
+    async def hlogs(self):
+        logging.info("Getting last night's healing logs.")
+
+        request_url = request_pattern.format(self.guild, self.realm_slug, self.region, self.warcraft_logs_api_key)
+
+        r = requests.get(request_url)
+
+        if r.status_code == 200:
+            json = r.json()
+            if len(json) > 0:
+                await self.bot.say(
+                    "Latest healing log:\n" + warcraft_logs_url_pattern.format(json[-1]['id']) + "#type=healing")
+            else:
+                await self.bot.say("No logs for guild configured.")
+        else:
+            await self.bot.say("Error while retrieving logs.")
+
 
 def setup(bot):
     bot.add_cog(WarcraftLogs(bot))

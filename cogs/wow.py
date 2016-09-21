@@ -14,22 +14,59 @@ battle_net_api = {
 
 wow_page_template = "http://us.battle.net/wow/en/character/{}/{}/advanced"
 
-character_info_pattern = "{}wow/character/{}/{}?fields=items,guild,talents,progression&locale=en_US&apikey={}"
+# region, realm, character, key
+character_info_pattern = "{}wow/character/{}/{}?fields=items,guild,talents&locale=en_US&apikey={}"
+progression_pattern = "{}wow/character/{}/{}?fields=progression&locale=en_US&apikey={}"
+
 race_info_pattern = "{}wow/data/character/races?locale=en_US&apikey={}"
 class_info_pattern = "{}wow/data/talents?locale=en_US&apikey={}"
 
 response_pattern = "{}-{} is an iLevel {} {} {} in the guild {}.\n{}"
+prog_resposne_pattern = "{}-{} is {}/{}N, {}/{}H, {}/{}M for {}."
 
 # TODO: load this list from api
-raids = [
-    "Molten Core", "Blackwing Lair", "Ruins of Ahn'Qiraj", "Ahn'Qiraj Temple", "Karazhan", "Magtheridon's Lair",
-    "Gruul's Lair", "Serpentshrine Cavern", "Tempest Keep", "The Battle for Mount Hyjal", "Black Temple", "The Sunwell",
-    "Vault of Archavon", "Naxxramas", "The Obsidian Sanctum", "The Eye of Eternity", "Ulduar", "Onyxia's Lair",
-    "Trial of the Crusader", "Icecrown Citadel", "The Ruby Sanctum", "Baradin Hold", "Blackwing Descent",
-    "The Bastion of Twilight", "Throne of the Four Winds", "Firelands", "Dragon Soul", "Mogu'shan Vaults",
-    "Heart of Fear", "Terrace of Endless Spring", "Throne of Thunder", "Siege of Orgrimmar", "Highmaul",
-    "Blackrock Foundry", "Hellfire Citadel", "The Emerald Nightmare", "The Nighthold"
-]
+raids = {
+    "Molten Core" : 1,
+    "Blackwing Lair" : 1,
+    "Ruins of Ahn'Qiraj" : 1,
+    "Ahn'Qiraj Temple" : 1,
+    "Karazhan" : 1,
+    "Magtheridon's Lair" : 1,
+    "Gruul's Lair" : 1,
+    "Serpentshrine Cavern" : 1,
+    "Tempest Keep" : 1,
+    "The Battle for Mount Hyjal" : 1,
+    "Black Temple" : 1,
+    "The Sunwell" : 1,
+    "Vault of Archavon" : 4,
+    "Naxxramas" : 15,
+    "The Obsidian Sanctum" : 1,
+    "The Eye of Eternity" : 1,
+    "Ulduar" : 14,
+    "Onyxia's Lair" : 1,
+    "Trial of the Crusader" : 5,
+    "Icecrown Citadel" : 12,
+    "The Ruby Sanctum" : 1,
+    "Baradin Hold" : 3,
+    "Blackwing Descent" : 6,
+    "The Bastion of Twilight" : 5,
+    "Throne of the Four Winds" : 2,
+    "Firelands" : 7,
+    "Dragon Soul" : 8,
+    "Mogu'shan Vaults" : 6,
+    "Heart of Fear" : 6,
+    "Terrace of Endless Spring" : 4,
+    "Throne of Thunder" : 13,
+    "Siege of Orgrimmar" : 14,
+    "Highmaul" : 7,
+    "Blackrock Foundry" : 10,
+    "Hellfire Citadel" : 13,
+    "The Emerald Nightmare" : 7,
+    "The Nighthold" : 10
+}
+
+latest_open_raid = "Hellfire Citadel"
+
 
 # TODO: simulate dps? make sure response from blizzard api is code 200
 class WoWSearch:
@@ -82,7 +119,7 @@ class WoWSearch:
         else:
             raise Exception("Failed to load classes from Blizzard API. Status code: " + status)
 
-    def __get_guild_info(self, guild: str, realm: str):
+    def __get_guild_info(self, guild, realm):
         pass
         # TODO: this
 
@@ -90,7 +127,7 @@ class WoWSearch:
         name="plookup",
         description="Get a character's iLevel, class, etc. Character and realm names are case sensitive",
         brief="Get WoW character info",
-        aliases=["playerlookup"],
+        aliases=["playerlookup", "pl"],
         pass_context=True
     )
     # figure out how to make this call the info command if no subcommand is given.
@@ -99,7 +136,7 @@ class WoWSearch:
             await self.bot.say("Invalid subcommand: " + ctx.subcommand_passed)
 
     @player_lookup.command(name="info")
-    async def get_info(self, player: str):
+    async def get_info(self, player):
         logging.info("Getting character info for " + player + "...")
 
         await self.bot.say("Finding character " + player + "...")
@@ -137,7 +174,7 @@ class WoWSearch:
                         'spec': response['talents'][0]['spec']['name'],
                         'ilvl': response['items']['averageItemLevelEquipped'],
                         'guild': response['guild']['name'],
-                        'progression': response['progression']['raids']
+                        # 'progression': response['progression']['raids']
                     }
 
                     message = response_pattern.format(
@@ -154,27 +191,6 @@ class WoWSearch:
                     )
 
                     await self.bot.say(message)
-
-    @player_lookup.command(name="progress")
-    async def progression(self, player: str, raid: str = "latest"):
-        logging.info("Getting " + raid + " progression for " + player + "...")
-
-        def search_for_raid(r: str):
-            for rd in raids:
-                if r.lower() in rd.lower():
-                    return rd
-
-            return None
-
-        raid_title = search_for_raid(raid)
-        if raid == "latest" or raid_title is not None:
-            pass
-            await self.bot.say("valid raid: " + raid_title)
-            # TODO: the rest of this method
-        else:
-            logging.error("Invalid raid tier: " + raid)
-            await self.bot.say("Raid not found: " + raid)
-
 
 def setup(bot):
     bot.add_cog(WoWSearch(bot))
