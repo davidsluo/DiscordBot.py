@@ -19,7 +19,6 @@ if __name__ == '__main__':
     config = load_config()
 
     extensions = [
-        # 'cogs.wow',
         'cogs.warcraftlogs'
     ]
 
@@ -32,5 +31,5 @@ if __name__ == '__main__':
         except Exception as e:
             logging.error('Failed to load extension {}\n{}: {}'.format(extension, type(e).__name__, e))
 
-    bot.run(config['discord_token'])
+    bot.run(config['discord']['discord_token'])
 

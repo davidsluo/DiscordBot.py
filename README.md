@@ -11,7 +11,7 @@ I may or may not know what I'm doing, so things will probably be broken often.
 * WoW stuff
     * Guild lookup
     * More detailed player lookup
-* Some administrative/debug comands
+* Some administrative/debug commands
 
 ## WIP
 * WoW Stuff
