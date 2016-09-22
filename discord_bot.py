@@ -1,5 +1,7 @@
 import json
 import logging
+import sys
+import traceback
 
 from discord.ext import commands
 
@@ -15,11 +17,27 @@ def load_config():
         return json.load(f)
 
 
+@bot.event
+async def on_command_error(error, ctx):
+    await bot.send_message(ctx.message.channel, "Something went wrong. Probably a syntax error.")
+    print('In {0.command.qualified_name}:'.format(ctx), file=sys.stderr)
+    traceback.print_tb(error.original.__traceback__)
+    print('{0.__class__.__name__}: {0}'.format(error.original), file=sys.stderr)
+
+# @commands.command(
+#     name="setname",
+#     hidden=True
+# )
+# async def set_name(name):
+
+
+
 if __name__ == '__main__':
     config = load_config()
 
     extensions = [
-        'cogs.warcraftlogs'
+        'cogs.warcraftlogs',
+        'cogs.rnjesus'
     ]
 
     bot.config = config
@@ -32,4 +50,3 @@ if __name__ == '__main__':
             logging.error('Failed to load extension {}\n{}: {}'.format(extension, type(e).__name__, e))
 
     bot.run(config['discord']['discord_token'])
-
