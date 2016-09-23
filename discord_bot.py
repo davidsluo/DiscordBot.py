@@ -1,5 +1,7 @@
 import json
 import logging
+import sys
+import traceback
 
 import discord
 import requests
@@ -17,12 +19,12 @@ def load_config():
         return json.load(f)
 
 
-# @bot.event
-# async def on_command_error(error, ctx):
-#     await bot.send_message(ctx.message.channel, "Something went wrong. Probably a syntax error.")
-#     print('In {0.command.qualified_name}:'.format(ctx), file=sys.stderr)
-#     traceback.print_tb(error.original.__traceback__)
-#     print('{0.__class__.__name__}: {0}'.format(error.original), file=sys.stderr)
+@bot.event
+async def on_command_error(error, ctx):
+    await bot.send_message(ctx.message.channel, "Something went wrong. Probably a syntax error.")
+    print('In {0.command.qualified_name}:'.format(ctx), file=sys.stderr)
+    traceback.print_tb(error.original.__traceback__)
+    print('{0.__class__.__name__}: {0}'.format(error.original), file=sys.stderr)
 
 
 @bot.command(
@@ -55,6 +57,22 @@ async def set_avatar(ctx, image_url):
             await bot.say("Invalid URL.")
         except discord.errors.InvalidArgument:
             await bot.say("Not a valid avatar.")
+    else:
+        await bot.say("You are not the bot owner!")
+
+
+@bot.command(
+    name="setplaying",
+    hidden=True,
+    pass_context=True
+)
+async def set_playing(ctx, *, playing=''):
+    if ctx.message.author.id == bot.config['discord']['owner_client_id']:
+        game = discord.Game(name=playing)
+        await bot.change_status(game if playing.strip() != '' else None)
+        await bot.say("Playing status set.")
+    else:
+        await bot.say("You are not the bot owner!")
 
 
 if __name__ == '__main__':
