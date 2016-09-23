@@ -22,7 +22,7 @@ class RNJesus:
         elif 1 <= max <= 1e250:
             rand = random.randint(1, max)
 
-            await self.bot.say("@{} rolls {} (1-{})".format(ctx.message.author, rand, int(max)))
+            await self.bot.say("{} rolls {} (1-{})".format(ctx.message.author.mention, rand, int(max)))
         else:
             await self.bot.say("Range must be between 1 and 1e250.")
 
