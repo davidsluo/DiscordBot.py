@@ -17,6 +17,7 @@ I may or may not know what I'm doing, so things will probably be broken often.
 ## WIP
 * WoW Stuff
     * Warcraft logs integration
+    * SimulationCraft integration
 
 ## On Hold
 * WoW stuff
