@@ -12,7 +12,7 @@ from cogs.utils.wow import validate_character
 # 1 = realm slug
 # 2 = character name
 # 3 = file_path
-command_pattern = "./cogs/simulationcraft/simulator/simc armory={0},{1},{2} html={3}"
+command_pattern = "cogs/simulator/simc armory={0},{1},{2} html={3}"
 
 output_file_path = "static/{0}-{1}-{2}_{3}.html"
 
@@ -47,10 +47,10 @@ class SimulationCraft:
 
             timestamp = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d_%H.%M.%S')
             output_file = output_file_path.format(region.lower(), wow.get_realm_slug(realm), name, timestamp)
-            file_url = file_url_pattern.format(self.bot.config['simulationcraft']['host'], realm.lower(), wow.get_realm_slug(realm), name, timestamp)
+            file_url = file_url_pattern.format(self.bot.config['simulationcraft']['host'], region.lower(), wow.get_realm_slug(realm), name, timestamp)
             command = command_pattern.format(region.lower(), wow.get_realm_slug(realm), name, output_file)
 
-            subprocess.call(command)
+            subprocess.call(command, shell=True)
 
             if self.bot.config['simulationcraft']['webserver']:
                 await self.bot.say(file_url)
