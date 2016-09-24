@@ -1,4 +1,5 @@
 import datetime
+import os
 import subprocess
 import time
 
@@ -19,6 +20,9 @@ output_file_path = "static/{0}-{1}-{2}_{3}.html"
 class SimulationCraft:
     def __init__(self, bot):
         self.bot = bot
+
+        if not os.path.exists("static") or not os.path.isdir("static"):
+            os.makedirs("static")
 
     @commands.command(
         name="sim",
