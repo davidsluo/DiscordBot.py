@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Past Simulations</title>
+</head>
+<body>
+<h1>Past Simulations</h1>
+<ul>
+{% if files %}
+    {% for f in files %}
+        <li><a href="/{{f}}">{{f[:-5]}}</a></li>
+    {% endfor %}
+{% endif %}
+</ul>
+</body>
+</html>
