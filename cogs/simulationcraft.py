@@ -16,6 +16,8 @@ command_pattern = "./cogs/simulationcraft/simulator/simc armory={0},{1},{2} html
 
 output_file_path = "static/{0}-{1}-{2}_{3}.html"
 
+file_url_pattern = "http://{0}/{1}-{2}-{3}_{4}.html"
+
 
 class SimulationCraft:
     def __init__(self, bot):
@@ -45,11 +47,16 @@ class SimulationCraft:
 
             timestamp = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d_%H.%M.%S')
             output_file = output_file_path.format(region.lower(), wow.get_realm_slug(realm), name, timestamp)
+            file_url = file_url_pattern.format(self.bot.config['simulationcraft']['host'], realm.lower(), wow.get_realm_slug(realm), name, timestamp)
             command = command_pattern.format(region.lower(), wow.get_realm_slug(realm), name, output_file)
+
             subprocess.call(command)
 
-            with open(output_file, 'rb') as f:
-                await self.bot.send_file(ctx.message.channel, f)
+            if self.bot.config['simulationcraft']['webserver']:
+                await self.bot.say(file_url)
+            else:
+                with open(output_file, 'rb') as f:
+                    await self.bot.send_file(ctx.message.channel, f)
         else:
             await self.bot.say("Character name could not be verified.")
 
