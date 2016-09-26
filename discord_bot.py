@@ -120,7 +120,8 @@ if __name__ == '__main__':
     extensions = [
         'cogs.warcraftlogs',
         'cogs.rnjesus',
-        'cogs.simulationcraft'
+        # 'cogs.simulationcraft'
+        'cogs.sounds'
     ]
 
     for extension in extensions:
