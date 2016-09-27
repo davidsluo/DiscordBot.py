@@ -1,70 +1,72 @@
+from discord import InvalidArgument
 from discord.ext import commands
 
 
 class Sounds:
     def __init__(self, bot):
         self.bot = bot
+        # TODO: save this all to json or something later
+        # TODO: verify that files exist
+        self.sounds = {
+            "not_prepared.mp3": {
+                "name": "notprepared",
+                "description": "YOU ARE NOT PREPARED",
+                "brief": "YOU ARE NOT PREPARED",
+            },
+            "prepared.mp3": {
+                "name": "prepared",
+                "description": "YOU ARE NOW PREPARED",
+                "brief": "YOU ARE NOW PREPARED",
+            },
+            "setback.mp3": {
+                "name": "setback",
+                "description": "TEMPEST KEEP WAS MERELY A SETBACK",
+                "brief": "MERELY A SETBACK",
+            },
+            "bork.mp3": {
+                "name": "gabe",
+                "aliases": ["bork"],
+                "description": "Gabe the dog.",
+                "brief": "Bork",
+            }
+        }
 
-    # TODO: figure out how to programmatically add these.
-    # TODO: figure out if I can include the mp3 files
+        self.update_sound_commands()
 
-    async def play_sound(self, ctx, filename, volume=0.4):
-        v_channel = ctx.message.author.voice
+    def update_sound_commands(self):
+        for filename, command_args in self.sounds.items():
+            kwargs = command_args
+
+            def make_command(filename_, kwargs_):
+                vol = kwargs.pop('volume') if kwargs.get('volume', None) else 0.4
+
+                @commands.command(
+                    pass_context=True,
+                    no_pm=True,
+                    **kwargs_
+                )
+                async def sound_command(ctx, volume=vol):
+                    await self.play_sound(ctx.message.author.voice.voice_channel, filename=filename_, volume=volume)
+
+                return sound_command
+
+            self.bot.add_command(make_command(filename, kwargs))
+
+    async def play_sound(self, v_channel, filename, volume=0.4):
 
         if v_channel:
-            client = await self.bot.join_voice_channel(v_channel.voice_channel)
+            try:
+                client = await self.bot.join_voice_channel(v_channel)
 
-            player = client.create_ffmpeg_player('sounds/' + filename)
+                player = client.create_ffmpeg_player('sounds/' + filename)
 
-            player.volume = volume
-            player.start()
+                player.volume = volume
+                player.start()
 
-            player.join()
-            await client.disconnect()
-
-    @commands.command(
-        name="notprepared",
-        # alias=["notprepared"],
-        description="YOU ARE NOT PREPARED",
-        brief="YOU ARE NOT PREPARED",
-        pass_context=True,
-        no_pm=True
-    )
-    async def not_prepared(self, ctx):
-        await self.play_sound(ctx, 'not_prepared.mp3')
-
-    @commands.command(
-        name="prepared",
-        # aliases=["prepared"],
-        description="YOU ARE NOW PREPARED",
-        brief="YOU ARE NOW PREPARED",
-        pass_context=True,
-        no_pm=True
-    )
-    async def prepared(self, ctx):
-        await self.play_sound(ctx, 'prepared.mp3')
-
-    @commands.command(
-        name="setback",
-        # aliases=["setback"],
-        description="TEMPEST KEEP WAS MERELY A SETBACK",
-        brief="MERELY A SETBACK",
-        pass_context=True,
-        no_pm=True
-    )
-    async def setback(self, ctx):
-        await self.play_sound(ctx, 'setback.mp3')
-
-    @commands.command(
-        name="gabe",
-        aliases=["bork"],
-        description="Gabe the dog.",
-        brief="Bork",
-        pass_context=True,
-        no_pm=True
-    )
-    async def bork(self, ctx):
-        await self.play_sound(ctx, 'bork.mp3')
+                player.join()
+                await client.disconnect()
+            except InvalidArgument:
+                await self.bot.say("Channel must be a voice channel.")
 
 
 def setup(bot):
