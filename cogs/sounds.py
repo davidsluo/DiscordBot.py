@@ -1,5 +1,6 @@
 from discord.ext import commands
 
+
 class Sounds:
     def __init__(self, bot):
         self.bot = bot
@@ -34,7 +35,7 @@ class Sounds:
 
     @commands.command(
         name="prepared",
-        # alias=["prepared"],
+        # aliases=["prepared"],
         description="YOU ARE NOW PREPARED",
         brief="YOU ARE NOW PREPARED",
         pass_context=True,
@@ -45,7 +46,7 @@ class Sounds:
 
     @commands.command(
         name="setback",
-        # alias=["setback"],
+        # aliases=["setback"],
         description="TEMPEST KEEP WAS MERELY A SETBACK",
         brief="MERELY A SETBACK",
         pass_context=True,
@@ -53,6 +54,17 @@ class Sounds:
     )
     async def setback(self, ctx):
         await self.play_sound(ctx, 'setback.mp3')
+
+    @commands.command(
+        name="gabe",
+        aliases=["bork"],
+        description="Gabe the dog.",
+        brief="Bork",
+        pass_context=True,
+        no_pm=True
+    )
+    async def bork(self, ctx):
+        await self.play_sound(ctx, 'bork.mp3')
 
 
 def setup(bot):
