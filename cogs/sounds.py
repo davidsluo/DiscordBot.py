@@ -7,6 +7,20 @@ class Sounds:
     # TODO: figure out how to programmatically add these.
     # TODO: figure out if I can include the mp3 files
 
+    async def play_sound(self, ctx, filename, volume=0.4):
+        v_channel = ctx.message.author.voice
+
+        if v_channel:
+            client = await self.bot.join_voice_channel(v_channel.voice_channel)
+
+            player = client.create_ffmpeg_player('sounds/' + filename)
+
+            player.volume = volume
+            player.start()
+
+            player.join()
+            await client.disconnect()
+
     @commands.command(
         name="notprepared",
         # alias=["notprepared"],
@@ -16,18 +30,7 @@ class Sounds:
         no_pm=True
     )
     async def not_prepared(self, ctx):
-        v_channel = ctx.message.author.voice
-
-        if v_channel:
-            client = await self.bot.join_voice_channel(v_channel.voice_channel)
-
-            player = client.create_ffmpeg_player('sounds/not_prepared.mp3')
-
-            player.volume = .40
-            player.start()
-
-            player.join()
-            await client.disconnect()
+        await self.play_sound(ctx, 'not_prepared.mp3')
 
     @commands.command(
         name="prepared",
@@ -38,18 +41,7 @@ class Sounds:
         no_pm=True
     )
     async def prepared(self, ctx):
-        v_channel = ctx.message.author.voice
-
-        if v_channel:
-            client = await self.bot.join_voice_channel(v_channel.voice_channel)
-
-            player = client.create_ffmpeg_player('sounds/prepared.mp3')
-
-            player.volume = .30
-            player.start()
-
-            player.join()
-            await client.disconnect()
+        await self.play_sound(ctx, 'prepared.mp3')
 
     @commands.command(
         name="setback",
@@ -60,18 +52,7 @@ class Sounds:
         no_pm=True
     )
     async def setback(self, ctx):
-        v_channel = ctx.message.author.voice
-
-        if v_channel:
-            client = await self.bot.join_voice_channel(v_channel.voice_channel)
-
-            player = client.create_ffmpeg_player('sounds/setback.mp3')
-
-            player.volume = .40
-            player.start()
-
-            player.join()
-            await client.disconnect()
+        await self.play_sound(ctx, 'setback.mp3')
 
 
 def setup(bot):

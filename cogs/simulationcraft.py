@@ -58,7 +58,7 @@ class SimulationCraft:
                 with open(output_file, 'rb') as f:
                     await self.bot.send_file(ctx.message.channel, f)
         else:
-            await self.bot.say("Character name could not be verified.")
+            await self.bot.say_delete("Character name could not be verified.")
 
 
 def setup(bot):

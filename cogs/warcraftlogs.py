@@ -32,9 +32,9 @@ class WarcraftLogs:
                 await self.bot.say(
                     "Latest {} log:\n".format(section) + warcraft_logs_url_pattern.format(json[-1]['id'], section))
             else:
-                await self.bot.say("No logs for guild configured.")
+                await self.bot.say_delete("No logs for guild configured.")
         else:
-            await self.bot.say("Error while retrieving logs: " + r.status_code + ".")
+            await self.bot.say_delete("Error while retrieving logs: " + r.status_code + ".")
 
     @commands.group(
         pass_context=True,

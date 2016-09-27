@@ -1,7 +1,9 @@
+import asyncio
 import json
 import logging
 import sys
 import traceback
+from enum import Enum
 
 import discord
 import requests
@@ -11,7 +13,23 @@ from discord.ext.commands import CommandNotFound, UserInputError, NoPrivateMessa
 
 logging.basicConfig(format="[%(asctime)s] [%(levelname)-8s] - %(message)s", level=logging.INFO)
 
-bot = commands.Bot(
+
+class DeleteDelays(Enum):
+    ten_mins = 600
+    five_mins = 300
+    one_min = 60
+    default = one_min
+
+
+class BotWrapper(commands.Bot):
+    def __init__(self, *args, **options):
+        super().__init__(*args, **options)
+
+    async def say_delete(self, *args, delete_after=DeleteDelays.default, **kwargs):
+        super().say(*args, delete_after=delete_after, **kwargs)
+
+
+bot = BotWrapper(
     command_prefix="?",
     description="Bot that does cool stuff.",
     help_attrs=dict(hidden=True)
@@ -26,41 +44,59 @@ def load_config():
 @bot.event
 async def on_command_error(error, ctx):
     if isinstance(error, CommandNotFound):
-        await bot.send_message(ctx.message.channel,
-                               "CommandNotFound:\nThis command does not exist.")
+        message = await bot.send_message(
+            ctx.message.channel,
+            "CommandNotFound:\nThis command does not exist.")
     elif isinstance(error, UserInputError):
-        await bot.send_message(ctx.message.channel,
-                               "UserInputError")
+        message = await bot.send_message(
+            ctx.message.channel,
+            "UserInputError")
     elif isinstance(error, NoPrivateMessage):
-        await bot.send_message(ctx.message.channel,
-                               "NoPrivateMessage:\nThis command cannot be used through private messages.")
+        message = await bot.send_message(
+            ctx.message.channel,
+            "NoPrivateMessage:\nThis command cannot be used through private messages.")
     elif isinstance(error, CheckFailure):
-        await bot.send_message(ctx.message.channel,
-                               "CheckFailure:\nOne of the requirements for this command was not met.")
+        message = await bot.send_message(
+            ctx.message.channel,
+            "CheckFailure:\nOne of the requirements for this command was not met.")
     elif isinstance(error, DisabledCommand):
-        await bot.send_message(ctx.message.channel,
-                               "DisabledCommand:\nThis command is not enabled.")
+        message = await bot.send_message(
+            ctx.message.channel,
+            "DisabledCommand:\nThis command is not enabled.")
     elif isinstance(error, CommandInvokeError):
-        await bot.send_message(ctx.message.channel,
-                               "CommandInvokeError:\nSomething went wrong while trying to execute your command.")
+        message = await bot.send_message(
+            ctx.message.channel,
+            "CommandInvokeError:\nSomething went wrong while trying to execute your command.")
     elif isinstance(error, CommandOnCooldown):
-        await bot.send_message(ctx.message.channel,
-                               "CommandOnCooldown:\nThis command is on cooldown.")
+        message = await bot.send_message(
+            ctx.message.channel,
+            "CommandOnCooldown:\nThis command is on cooldown.")
     elif isinstance(error, CommandError):
-        await bot.send_message(ctx.message.channel,
-                               "CommandError:\nSomething went wrong while trying to execute your command.")
+        message = await bot.send_message(
+            ctx.message.channel,
+            "CommandError:\nSomething went wrong while trying to execute your command.")
     elif isinstance(error, MissingRequiredArgument):
-        await bot.send_message(ctx.message.channel,
-                               "MissingRequiredArgument:\nOne or more parameters required to execute this command are missing.")
+        message = await bot.send_message(
+            ctx.message.channel,
+            "MissingRequiredArgument:\nOne or more parameters required to execute this command are missing.")
     elif isinstance(error, TooManyArguments):
-        await bot.send_message(ctx.message.channel,
-                               "TooManyArguments:\nToo many arguments were given to the command.")
+        message = await bot.send_message(
+            ctx.message.channel,
+            "TooManyArguments:\nToo many arguments were given to the command.")
     elif isinstance(error, BadArgument):
-        await bot.send_message(ctx.message.channel,
-                               "BadArgument:\nInvalid argument.")
+        message = await bot.send_message(
+            ctx.message.channel,
+            "BadArgument:\nInvalid argument.")
     else:
-        await bot.send_message(ctx.message.channel,
-                               "Something went very, very wrong...")
+        message = await bot.send_message(
+            ctx.message.channel,
+            "Something went very, very wrong...")
+
+    async def delayed_delete():
+        await asyncio.sleep(DeleteDelays.default)
+        await bot.delete_message(message)
+
+    discord.compat.create_task(delayed_delete(), loop=bot.loop)
 
     print('Exception thrown while executing command {}'.format(ctx.command), file=sys.stderr)
     traceback.print_tb(error.original.__traceback__)
@@ -76,9 +112,9 @@ async def set_name(ctx, *, name):
     if ctx.message.author.id == bot.config['discord']['owner_client_id']:
         await bot.change_nickname(ctx.message.server.me, name)
 
-        await bot.say("Bot name set to " + name + ".")
+        await bot.say_delete("Bot name set to {}.".format(name))
     else:
-        await bot.say("You are not the bot owner!")
+        await bot.say_delete("You are not the bot owner!")
 
 
 @bot.command(
@@ -92,13 +128,13 @@ async def set_avatar(ctx, image_url):
             r = requests.get(image_url)
 
             await bot.edit_profile(avatar=r.content)
-            await bot.say("Bot avatar set.")
+            await bot.say_delete("Bot avatar set.")
         except requests.exceptions.MissingSchema:
-            await bot.say("Invalid URL.")
+            await bot.say_delete("Invalid URL.")
         except discord.errors.InvalidArgument:
-            await bot.say("Not a valid avatar.")
+            await bot.say_delete("Not a valid avatar.")
     else:
-        await bot.say("You are not the bot owner!")
+        await bot.say_delete("You are not the bot owner!")
 
 
 @bot.command(
@@ -109,9 +145,10 @@ async def set_avatar(ctx, image_url):
 async def set_playing(ctx, *, playing=None):
     if ctx.message.author.id == bot.config['discord']['owner_client_id']:
         await bot.change_status(game=discord.Game(name=playing))
-        await bot.say("Playing status set.")
+        await bot.say_delete("Playing status set.")
     else:
-        await bot.say("You are not the bot owner!")
+        await bot.say_delete("You are not the bot owner!")
+
 
 if __name__ == '__main__':
 
