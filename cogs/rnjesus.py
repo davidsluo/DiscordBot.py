@@ -9,8 +9,8 @@ class RNJesus:
 
     @commands.command(
         pass_context=True,
-        name="rng",
-        aliases=["rand", "random", "roll"],
+        name="roll",
+        aliases=["rand", "random", "rng"],
         description="Do some random shit.",
         brief="Pray to RNJesus."
     )

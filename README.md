@@ -4,10 +4,8 @@ I may or may not know what I'm doing, so things will probably be broken often.
 
 ## Planned/TODO
 * Quote Database
-* RNG command
 * Web search (Bing, Duck Duck Go, etc.)
 * YouTube search
-* Soundboard
 * WoW stuff
     * Guild lookup
     * More detailed player lookup
@@ -17,12 +15,18 @@ I may or may not know what I'm doing, so things will probably be broken often.
 ## WIP
 * WoW Stuff
     * Warcraft logs integration
-    * SimulationCraft integration
+* Soundboard
+    * Need to find more sounds
 
 ## On Hold
 * WoW stuff
+    * SimulationCraft integration
     * Getting player progression
 
 ## Done (mostly)
 * WoW stuff
     * Getting basic character info (i.e. ilvl, specialization, class, guild, etc.)
+* RNG command
+    * Coin flip
+    * Roll the dice
+    * Decide between choices
