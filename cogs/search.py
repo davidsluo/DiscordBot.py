@@ -1,3 +1,6 @@
+import re
+import urllib
+
 import requests
 from discord.ext import commands
 
@@ -42,5 +45,54 @@ class Wikipedia:
             await self.bot.say_delete("Error while searching Wikipedia.")
 
 
+class Bing:
+    def __init__(self, bot):
+        self.bot = bot
+
+    @commands.command(
+        name="bing",
+        aliases=["b"],
+        description="Search Bing.",
+        brief="Search Bing."
+    )
+    async def search(self, *, query):
+        search_payload = {"q": query, "count": 1, "responseFilter": "webPages"}
+        search_header = {"Ocp-Apim-Subscription-Key": self.bot.config['api_keys']["bing"]}
+
+        r = requests.get("https://api.cognitive.microsoft.com/bing/v5.0/search", params=search_payload,
+                         headers=search_header)
+
+        response = r.json()
+
+        if r.status_code == 200:
+            if response["webPages"]:
+                results = response["webPages"]["value"]
+
+                formatted_results = []
+
+                for result in results:
+                    match = re.search("(?<=(r=))(.*?)(?=(&p))", result['url'])
+
+                    if match:
+                        url = urllib.parse.unquote(match.group(0))
+                        formatted_results.append("**{0}**\n{1}".format(result['name'], url))
+
+                message = "Showing **{0}** results for **{1}**\n{2}.".format(
+                    len(formatted_results),
+                    query,
+                    "\n".join(formatted_results)
+                )
+
+                await self.bot.say(message)
+
+            else:
+                await self.bot.say_delete("No results for {}.".format(query))
+        elif r.status_code == 429:
+            await self.bot.say_delete(response["error"]["message"])
+        else:
+            await self.bot.say_delete("Error while searching Bing.")
+
+
 def setup(bot):
     bot.add_cog(Wikipedia(bot))
+    bot.add_cog(Bing(bot))
