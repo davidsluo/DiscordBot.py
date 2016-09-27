@@ -3,7 +3,7 @@ import json
 import logging
 import sys
 import traceback
-from enum import Enum
+from enum import IntEnum
 
 import discord
 import requests
@@ -14,7 +14,7 @@ from discord.ext.commands import CommandNotFound, UserInputError, NoPrivateMessa
 logging.basicConfig(format="[%(asctime)s] [%(levelname)-8s] - %(message)s", level=logging.INFO)
 
 
-class DeleteDelays(Enum):
+class DeleteDelays(IntEnum):
     ten_mins = 600
     five_mins = 300
     one_min = 60
@@ -25,8 +25,8 @@ class BotWrapper(commands.Bot):
     def __init__(self, *args, **options):
         super().__init__(*args, **options)
 
-    async def say_delete(self, *args, delete_after=DeleteDelays.default, **kwargs):
-        super().say(*args, delete_after=delete_after, **kwargs)
+    def say_delete(self, *args, delete_after=DeleteDelays.default, **kwargs):
+        return super().say(*args, delete_after=delete_after, **kwargs)
 
 
 bot = BotWrapper(
@@ -158,7 +158,8 @@ if __name__ == '__main__':
         'cogs.warcraftlogs',
         'cogs.rnjesus',
         # 'cogs.simulationcraft'
-        'cogs.sounds'
+        'cogs.sounds',
+        'cogs.search'
     ]
 
     for extension in extensions:
