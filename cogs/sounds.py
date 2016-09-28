@@ -46,7 +46,9 @@ class Sounds:
 
             return sound_command
 
-        self.bot.add_command(make_command(kwargs))
+        command = make_command(kwargs)
+        command.instance = self
+        self.bot.add_command(command)
 
     async def play_sound(self, v_channel, filename, volume=0.4):
 
