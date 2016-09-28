@@ -1,0 +1,23 @@
+{
+    "gabe": {
+        "filename": "bork.mp3",
+        "aliases": ["bork"],
+        "brief": "Bork",
+        "description": "Gabe the dog."
+    },
+    "notprepared": {
+        "filename": "not_prepared.mp3",
+        "brief": "YOU ARE NOT PREPARED",
+        "description": "YOU ARE NOT PREPARED"
+    },
+    "setback": {
+        "filename": "setback.mp3",
+        "brief": "MERELY A SETBACK",
+        "description": "TEMPEST KEEP WAS MERELY A SETBACK"
+    },
+    "prepared": {
+        "filename": "prepared.mp3",
+        "brief": "YOU ARE NOW PREPARED",
+        "description": "YOU ARE NOW PREPARED"
+    }
+}

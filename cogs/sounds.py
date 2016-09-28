@@ -1,3 +1,5 @@
+import json
+
 from discord import InvalidArgument
 from discord.ext import commands
 
@@ -7,52 +9,44 @@ class Sounds:
         self.bot = bot
         # TODO: save this all to json or something later
         # TODO: verify that files exist
-        self.sounds = {
-            "not_prepared.mp3": {
-                "name": "notprepared",
-                "description": "YOU ARE NOT PREPARED",
-                "brief": "YOU ARE NOT PREPARED",
-            },
-            "prepared.mp3": {
-                "name": "prepared",
-                "description": "YOU ARE NOW PREPARED",
-                "brief": "YOU ARE NOW PREPARED",
-            },
-            "setback.mp3": {
-                "name": "setback",
-                "description": "TEMPEST KEEP WAS MERELY A SETBACK",
-                "brief": "MERELY A SETBACK",
-            },
-            "bork.mp3": {
-                "name": "gabe",
-                "aliases": ["bork"],
-                "description": "Gabe the dog.",
-                "brief": "Bork",
-            }
-        }
+        self.sounds = {}
 
-        self.update_sound_commands()
+        self.load_sound_commands()
 
-    def update_sound_commands(self):
-        for filename, command_args in self.sounds.items():
+        for name, command_args in self.sounds.items():
             kwargs = command_args
+            kwargs['name'] = name
 
-            def make_command(filename_, kwargs_):
-                vol = kwargs.pop('volume') if kwargs.get('volume', None) else 0.4
+            self.add_sound_command(kwargs)
 
-                @commands.command(
-                    pass_context=True,
-                    no_pm=True,
-                    **kwargs_
-                )
-                async def sound_command(ctx, volume=vol):
-                    await self.play_sound(ctx.message.author.voice.voice_channel, filename=filename_, volume=volume)
+    def load_sound_commands(self):
+        with open('sounds/sound_commands.json', 'r') as f:
+            self.sounds = json.loads(f.read())
 
-                return sound_command
+    def save_sound_commands(self):
+        with open('sounds/sound_commands.json', 'w') as f:
+            f.write(json.dumps(self.sounds, indent=4))
 
-            command = make_command(filename, kwargs)
-            command.instance = self
-            self.bot.add_command(command)
+    def add_sound_command(self, kwargs):
+        def make_command(kwargs_):
+            vol = kwargs_.pop('volume') if kwargs_.get('volume', None) else 0.4
+
+            filename = kwargs_.pop('filename')
+
+            if filename is None:
+                raise ValueError("Filename cannot be None.")
+
+            @commands.command(
+                pass_context=True,
+                no_pm=True,
+                **kwargs_
+            )
+            async def sound_command(ctx, volume=vol):
+                await self.play_sound(ctx.message.author.voice.voice_channel, filename=filename, volume=volume)
+
+            return sound_command
+
+        self.bot.add_command(make_command(kwargs))
 
     async def play_sound(self, v_channel, filename, volume=0.4):
 
