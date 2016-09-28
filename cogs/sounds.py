@@ -14,7 +14,7 @@ class Sounds:
         self.load_sound_commands()
 
         for name, command_args in self.sounds.items():
-            kwargs = command_args
+            kwargs = command_args.copy()
             kwargs['name'] = name
 
             self.add_sound_command(kwargs)
@@ -41,8 +41,22 @@ class Sounds:
                 no_pm=True,
                 **kwargs_
             )
-            async def sound_command(ctx, volume=vol):
-                await self.play_sound(ctx.message.author.voice.voice_channel, filename=filename, volume=volume)
+            # wtf why do i need self here i dont even
+            async def sound_command(self, ctx, volume=vol):
+                v_channel = ctx.message.author.voice.voice_channel
+                if v_channel:
+                    try:
+                        client = await ctx.bot.join_voice_channel(v_channel)
+
+                        player = client.create_ffmpeg_player('sounds/' + filename)
+
+                        player.volume = volume
+                        player.start()
+
+                        player.join()
+                        await client.disconnect()
+                    except InvalidArgument:
+                        await self.bot.say("Channel must be a voice channel.")
 
             return sound_command
 
@@ -50,21 +64,21 @@ class Sounds:
         command.instance = self
         self.bot.add_command(command)
 
-    async def play_sound(self, v_channel, filename, volume=0.4):
-
-        if v_channel:
-            try:
-                client = await self.bot.join_voice_channel(v_channel)
-
-                player = client.create_ffmpeg_player('sounds/' + filename)
-
-                player.volume = volume
-                player.start()
-
-                player.join()
-                await client.disconnect()
-            except InvalidArgument:
-                await self.bot.say("Channel must be a voice channel.")
+    # async def play_sound(self, v_channel, filename, volume=0.4):
+    #
+    #     if v_channel:
+    #         try:
+    #             client = await self.bot.join_voice_channel(v_channel)
+    #
+    #             player = client.create_ffmpeg_player('sounds/' + filename)
+    #
+    #             player.volume = volume
+    #             player.start()
+    #
+    #             player.join()
+    #             await client.disconnect()
+    #         except InvalidArgument:
+    #             await self.bot.say("Channel must be a voice channel.")
 
 
 def setup(bot):
