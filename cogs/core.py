@@ -49,13 +49,13 @@ class Core:
             await self.bot.change_status(game=discord.Game(name=playing))
             await self.bot.say_delete("Playing status set.")
         else:
-            await self.bot.say_delete("You are not the self.bot owner!")
+            await self.bot.say_delete("You are not the bot owner!")
 
     @commands.command(
         name="getinvitelink",
         aliases=["invitelink", "invite", "link"],
-        description="Get the link to invite this self.bot to your Discord server.",
-        brief="Get the invite link for this self.bot."
+        description="Get the link to invite this bot to your Discord server.",
+        brief="Get the invite link for this bot."
     )
     async def get_invite_link(self):
         await self.bot.say("https://discordapp.com/oauth2/authorize?client_id={}&scope=bot&permissions=0".format(
