@@ -58,7 +58,7 @@ class Core:
         brief="Get the invite link for this self.bot."
     )
     async def get_invite_link(self):
-        await self.bot.say("https://discordapp.com/oauth2/authorize?client_id={}&scope=b;ot&permissions=0".format(
+        await self.bot.say("https://discordapp.com/oauth2/authorize?client_id={}&scope=bot&permissions=0".format(
             self.bot.config['discord']['bot_client_id']))
 
     @commands.command(
