@@ -13,7 +13,7 @@ class Core:
         pass_context=True
     )
     async def set_name(self, ctx, *, name):
-        if ctx.message.author.id == self.bot.config['discord']['owner_client_id']:
+        if ctx.message.author.id == str(self.bot.config['discord']['owner_client_id']):
             await self.bot.change_nickname(ctx.message.server.me, name)
 
             await self.bot.say_delete("Bot name set to {}.".format(name))
