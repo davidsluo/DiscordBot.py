@@ -30,7 +30,7 @@ class RNJesus:
     @commands.command(
         name="decide",
         description="Decide between two or more choices.",
-        brief="Let RNJesus make the choice."
+        brief="Let RNJesus take the wheel."
     )
     async def decide(self, choice1, choice2, *other_choices):
         choices = [choice1, choice2]
