@@ -65,7 +65,7 @@ class Core:
         name="clean",
         aliases=["purge"],
         description="Clear this bot's messages from the chat history.",
-        brief="Clean the chat log.",
+        brief="Clean up chat.",
         pass_context=True
     )
     async def clean(self, ctx):
@@ -82,6 +82,33 @@ class Core:
         #     deleted = await self.bot.purge_from(ctx.message.channel, limit=1000, check=is_author)
 
         deleted = await self.bot.purge_from(ctx.message.channel, limit=1000, check=is_bot)
+
+        await self.bot.say("Deleted {} message(s).".format(len(deleted)))
+
+    @commands.command(
+        name="clean_commands",
+        aliases=["cc"],
+        description="Remove all command requests from this channel",
+        brief="Clean up chat harder.",
+        pass_context=True
+    )
+    async def clean_commands(self, ctx):
+
+        def is_bot_or_command(message):
+            return message.content.strip() != '' and \
+                   (
+                       message.author == ctx.message.server.me or
+                       (
+                           len(message.content) > 1 and
+                           (
+                               message.content.split(' ')[0][0] == '?' or
+                               message.content.split(' ')[0][0] == '!'
+                           )
+                       )
+                   )
+            # any([message.content.split(' ')[0][1:] == alias for alias in self.bot.commands]) or \
+
+        deleted = await self.bot.purge_from(ctx.message.channel, limit=1000, check=is_bot_or_command)
 
         await self.bot.say("Deleted {} message(s).".format(len(deleted)))
 
