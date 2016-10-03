@@ -46,7 +46,7 @@ class Core:
     )
     async def set_playing(self, ctx, *, playing=None):
         if ctx.message.author.id == self.bot.config['discord']['owner_client_id']:
-            await self.bot.change_status(game=discord.Game(name=playing))
+            await self.bot.change_presence(game=discord.Game(name=playing))
             await self.bot.say_delete("Playing status set.")
         else:
             await self.bot.say_delete("You are not the bot owner!")
